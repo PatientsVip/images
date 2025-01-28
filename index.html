@@ -7,27 +7,114 @@
     <link rel="stylesheet" href="styles.css">
     <!-- Add Inter font for Apple-like typography -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Add Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>PVIP Image Studio</h1>
-            <p class="subtitle">Create with AI for your Studies</p>
+            <p class="subtitle">Clinical Trial Marketing Image Generator</p>
         </header>
 
-        <div class="input-section">
-            <div class="input-wrapper">
-                <input type="text" id="promptInput" placeholder="Describe the image you want to create...">
-                <button id="generateBtn" class="generate-btn">Generate</button>
-                <button id="settingsBtn" class="settings-btn">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M10 13a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="1.5"/>
-                        <path d="M13.7 13.7l.7.7m-8.8-8.8l.7.7m0 7.4l-.7.7m8.8-8.8l-.7.7M19 10h-1m-16 0H1m9-9v1m0 16v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
-                </button>
+        <div class="prompt-builder">
+            <div class="style-preset">
+                <h3>Style Preset</h3>
+                <select id="stylePreset">
+                    <option value="pixar">Pixar 3D Animation Style</option>
+                    <option value="custom">Custom</option>
+                </select>
+                <input type="text" id="customStyle" class="custom-input" placeholder="Enter custom style description...">
+            </div>
+
+            <div class="scene-builder">
+                <h3>Scene Elements</h3>
+                <div class="scene-options">
+                    <div class="scene-element">
+                        <label>Setting</label>
+                        <select id="setting">
+                            <option value="medical-office">Medical Office</option>
+                            <option value="hospital-room">Hospital Room</option>
+                            <option value="research-facility">Research Facility</option>
+                        </select>
+                    </div>
+
+                    <div class="scene-element">
+                        <label>Healthcare Professional</label>
+                        <div class="character-builder">
+                            <select id="doctorGender">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                            <select id="doctorEthnicity">
+                                <option value="caucasian">Caucasian</option>
+                                <option value="african-american">African American</option>
+                                <option value="asian">Asian</option>
+                                <option value="hispanic">Hispanic</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="scene-element">
+                        <label>Patient</label>
+                        <div class="character-builder">
+                            <select id="patientGender">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                            <select id="patientEthnicity">
+                                <option value="caucasian">Caucasian</option>
+                                <option value="african-american">African American</option>
+                                <option value="asian">Asian</option>
+                                <option value="hispanic">Hispanic</option>
+                                <option value="middle-eastern">Middle Eastern</option>
+                            </select>
+                            <input type="number" id="patientAge" placeholder="Age" min="18" max="90">
+                        </div>
+                    </div>
+
+                    <div class="scene-element">
+                        <label>Scene Mood</label>
+                        <select id="sceneMood">
+                            <option value="positive">Positive/Hopeful</option>
+                            <option value="professional">Professional/Serious</option>
+                            <option value="caring">Caring/Supportive</option>
+                        </select>
+                    </div>
+
+                    <div class="scene-element">
+                        <label>Medical Context</label>
+                        <div class="medical-context">
+                            <select id="medicalAction">
+                                <option value="consultation">General Consultation</option>
+                                <option value="examination">Physical Examination</option>
+                                <option value="discussion">Treatment Discussion</option>
+                                <option value="procedure">Medical Procedure</option>
+                                <option value="custom">Custom Action</option>
+                            </select>
+                            <textarea id="medicalDetails" placeholder="Describe the specific medical condition, procedure, or interaction taking place... (e.g., 'Doctor examining patient's knee injury' or 'Discussing diabetes management plan')"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-elements">
+                    <label>Additional Elements (Optional)</label>
+                    <textarea id="customElements" placeholder="Describe any additional elements you'd like in the scene...(e.g. 'a glass filled with tongue depressors is on the table' or 'a medical poster is on the wall')"></textarea>
+                </div>
             </div>
         </div>
-        
+
+        <div class="final-prompt">
+            <h3>Generated Prompt (Review this before generating images)</h3>
+            <div class="prompt-preview" id="promptPreview">
+                <p>Your prompt will appear here...</p>
+            </div>
+            <div class="prompt-actions">
+                <button id="editPrompt" class="edit-btn">Edit Prompt</button>
+                <button id="generateBtn" class="generate-btn">Generate Images</button>
+            </div>
+        </div>
+
         <div class="feedback-section" id="systemFeedback">
             <div class="feedback-content">
                 <div class="pulse-loader"></div>
@@ -36,40 +123,37 @@
         </div>
 
         <div class="image-grid">
-            <div class="image-box">
-                <div class="image-placeholder">
-                    <span class="placeholder-text">Generation 1</span>
+            <div class="image-box" id="image1">
+                <div class="image-container">
+                    <img class="generated-image" src="" alt="Generated image 1" style="display: none;">
+                    <div class="image-placeholder">
+                        <span class="placeholder-text">Generation 1</span>
+                    </div>
                 </div>
                 <button class="download-btn" aria-label="Download image">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7 10 12 15 17 10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
+                    <i data-feather="download"></i>
                 </button>
             </div>
-            <div class="image-box">
-                <div class="image-placeholder">
-                    <span class="placeholder-text">Generation 2</span>
+            <div class="image-box" id="image2">
+                <div class="image-container">
+                    <img class="generated-image" src="" alt="Generated image 2" style="display: none;">
+                    <div class="image-placeholder">
+                        <span class="placeholder-text">Generation 2</span>
+                    </div>
                 </div>
                 <button class="download-btn" aria-label="Download image">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7 10 12 15 17 10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
+                    <i data-feather="download"></i>
                 </button>
             </div>
-            <div class="image-box">
-                <div class="image-placeholder">
-                    <span class="placeholder-text">Generation 3</span>
+            <div class="image-box" id="image3">
+                <div class="image-container">
+                    <img class="generated-image" src="" alt="Generated image 3" style="display: none;">
+                    <div class="image-placeholder">
+                        <span class="placeholder-text">Generation 3</span>
+                    </div>
                 </div>
                 <button class="download-btn" aria-label="Download image">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7 10 12 15 17 10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
+                    <i data-feather="download"></i>
                 </button>
             </div>
         </div>

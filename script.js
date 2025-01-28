@@ -1,74 +1,232 @@
 class DallEGenerator {
     constructor() {
-        this.apiKey = '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'; // Replace with your actual API key
+        this.apiKey = process.env.OPENAI_API_KEY; // Access environment variable
         this.apiUrl = 'https://api.openai.com/v1/images/generations';
+        
+        // Get all form elements
+        this.stylePreset = document.getElementById('stylePreset');
+        this.setting = document.getElementById('setting');
+        this.doctorGender = document.getElementById('doctorGender');
+        this.doctorEthnicity = document.getElementById('doctorEthnicity');
+        this.patientGender = document.getElementById('patientGender');
+        this.patientEthnicity = document.getElementById('patientEthnicity');
+        this.patientAge = document.getElementById('patientAge');
+        this.sceneMood = document.getElementById('sceneMood');
+        this.customElements = document.getElementById('customElements');
+        this.promptPreview = document.getElementById('promptPreview');
+        this.editPrompt = document.getElementById('editPrompt');
+        this.generateBtn = document.getElementById('generateBtn');
+        this.customStyle = document.getElementById('customStyle');
+        this.sceneBuilder = document.querySelector('.scene-builder');
+        this.customPromptInput = document.createElement('div');
+        this.customPromptInput.className = 'custom-prompt-input';
+        this.customPromptInput.innerHTML = `
+            <textarea id="customPromptText" placeholder="Enter your custom prompt here..."></textarea>
+        `;
+        this.sceneBuilder.parentNode.insertBefore(this.customPromptInput, this.sceneBuilder.nextSibling);
+        this.customPromptText = document.getElementById('customPromptText');
+        this.medicalAction = document.getElementById('medicalAction');
+        this.medicalDetails = document.getElementById('medicalDetails');
+        
         this.setupEventListeners();
+        this.updatePrompt(); // Initialize prompt
+        
+        // Initialize Feather icons
+        feather.replace();
+        
+        this.setupAnimations();
     }
 
     setupEventListeners() {
-        const promptInput = document.getElementById('promptInput');
-        const generateBtn = document.getElementById('generateBtn');
+        // Add event listeners to all form elements
+        const formElements = [
+            this.stylePreset, this.setting, this.doctorGender, this.doctorEthnicity,
+            this.patientGender, this.patientEthnicity, this.patientAge, this.sceneMood,
+            this.customElements
+        ];
 
-        // Handle Enter key
-        promptInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.generateImage(promptInput.value);
-            }
+        formElements.forEach(element => {
+            element.addEventListener('change', () => this.updatePrompt());
+        });
+
+        // Make prompt editable when edit button is clicked
+        this.editPrompt.addEventListener('click', () => {
+            this.promptPreview.contentEditable = true;
+            this.promptPreview.focus();
+            this.promptPreview.style.backgroundColor = '#ffffff';
+            this.promptPreview.style.border = '2px solid var(--primary-color)';
         });
 
         // Handle Generate button click
-        generateBtn.addEventListener('click', () => {
-            this.generateImage(promptInput.value);
+        this.generateBtn.addEventListener('click', () => this.generateImages());
+
+        // Add to setupEventListeners
+        this.stylePreset.addEventListener('change', () => {
+            const isCustom = this.stylePreset.value === 'custom';
+            this.sceneBuilder.style.display = isCustom ? 'none' : 'block';
+            this.customPromptInput.style.display = isCustom ? 'block' : 'none';
+            this.updatePrompt();
         });
-    }
-
-    async generateImage(prompt) {
-        if (!prompt.trim()) return;
-
-        const systemFeedback = document.getElementById('systemFeedback');
-        const feedbackContent = systemFeedback.querySelector('.feedback-content span');
-        feedbackContent.textContent = 'Generating your images...';
-
-        // Clear previous images and show placeholders
-        const imageBoxes = document.querySelectorAll('.image-box');
-        imageBoxes.forEach((box, index) => {
-            box.style.background = 'var(--surface-color)';
-            const placeholder = box.querySelector('.image-placeholder');
-            if (placeholder) {
-                placeholder.style.display = 'flex';
-                placeholder.querySelector('.placeholder-text').textContent = `Generating ${index + 1}...`;
+        
+        this.customPromptText.addEventListener('input', () => {
+            if (this.stylePreset.value === 'custom') {
+                this.promptPreview.innerHTML = `<p>${this.customPromptText.value}</p>`;
             }
         });
 
-        try {
-            // Generate 3 images in parallel
-            const promises = Array(3).fill().map(() => 
-                fetch(this.apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${this.apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: 'dall-e-3',
-                        prompt: prompt,
-                        n: 1,
-                        size: '1024x1024'
-                    })
-                }).then(res => res.json())
-            );
+        this.medicalAction.addEventListener('change', () => this.updatePrompt());
+        this.medicalDetails.addEventListener('input', () => this.updatePrompt());
+    }
 
-            const results = await Promise.all(promises);
+    setupAnimations() {
+        // Add smooth transitions for form elements
+        const formElements = document.querySelectorAll('select, input, textarea');
+        formElements.forEach(element => {
+            element.addEventListener('focus', () => {
+                element.style.transform = 'scale(1.02)';
+            });
             
-            results.forEach((data, index) => {
-                if (data.data && data.data[0].url) {
-                    this.displayImage(data.data[0].url, index);
+            element.addEventListener('blur', () => {
+                element.style.transform = 'scale(1)';
+            });
+        });
+    }
+
+    updatePrompt() {
+        if (this.stylePreset.value === 'custom') {
+            this.promptPreview.innerHTML = `<p>${this.customPromptText.value}</p>`;
+            return;
+        }
+
+        let style = this.stylePreset.value === 'pixar' ? 'Pixar-style 3D animated' : this.stylePreset.value;
+        const settingDesc = this.getSettingDescription(this.setting.value);
+        const doctorDesc = this.getCharacterDescription('doctor');
+        const patientDesc = this.getCharacterDescription('patient');
+        const moodDesc = this.getMoodDescription();
+        const medicalContext = this.getMedicalContext();
+        const additional = this.customElements.value.trim();
+
+        const prompt = `A ${style} scene set in ${settingDesc}. ${doctorDesc} ${patientDesc}. ${medicalContext} ${moodDesc}${additional ? '. ' + additional : ''}.`;
+
+        this.promptPreview.innerHTML = `<p>${prompt}</p>`;
+    }
+
+    getSettingDescription(settingValue) {
+        const descriptions = {
+            'medical-office': 'a warm and brightly lit medical office',
+            'hospital-room': 'a modern, well-equipped hospital room',
+            'research-facility': 'a state-of-the-art research facility',
+            'custom': this.setting.value
+        };
+        return descriptions[settingValue];
+    }
+
+    getCharacterDescription(type) {
+        if (type === 'doctor') {
+            return `A ${this.doctorEthnicity.value} ${this.doctorGender.value} healthcare professional wearing a white coat with`;
+        } else {
+            return `A ${this.patientEthnicity.value} ${this.patientGender.value} patient${this.patientAge.value ? ' ' + this.getAgeRange(this.patientAge.value) : ''}`;
+        }
+    }
+
+    getMoodDescription() {
+        const moods = {
+            'positive': 'The scene conveys a hopeful and optimistic atmosphere',
+            'professional': 'The interaction appears professional and focused',
+            'caring': 'The scene demonstrates a caring and supportive environment'
+        };
+        return moods[this.sceneMood.value];
+    }
+
+    getAgeRange(age) {
+        age = parseInt(age);
+        if (age < 13) return 'as a young child';
+        if (age < 20) return 'as a teenager';
+        if (age < 25) return 'in their early twenties';
+        if (age < 30) return 'in their late twenties';
+        if (age < 40) return 'in their thirties';
+        if (age < 50) return 'in their forties';
+        if (age < 60) return 'in their fifties';
+        if (age < 70) return 'in their sixties';
+        if (age < 80) return 'in their seventies';
+        return 'in their eighties or older years';
+    }
+
+    getMedicalContext() {
+        const action = this.medicalAction.value;
+        const details = this.medicalDetails.value.trim();
+        
+        if (!details) {
+            const defaultActions = {
+                'consultation': 'They are having a general medical consultation',
+                'examination': 'The doctor is performing a physical examination',
+                'discussion': 'They are discussing treatment options',
+                'procedure': 'The doctor is performing a medical procedure',
+                'custom': ''
+            };
+            return defaultActions[action] || '';
+        }
+        
+        return details;
+    }
+
+    async generateImages() {
+        const systemFeedback = document.getElementById('systemFeedback');
+        const prompt = this.promptPreview.textContent;
+        const imageBoxes = document.querySelectorAll('.image-box');
+
+        // Show loading state
+        document.querySelector('.image-grid').style.display = 'grid'; // Force grid to stay visible
+        imageBoxes.forEach(box => {
+            box.style.display = 'block'; // Ensure boxes stay visible
+            const placeholder = box.querySelector('.image-placeholder');
+            const img = box.querySelector('.generated-image');
+            placeholder.style.display = 'flex';
+            img.style.display = 'none';
+            placeholder.innerHTML = '<div class="loader"></div>';
+        });
+
+        try {
+            const response = await fetch('/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt }),
+            });
+
+            if (!response.ok) throw new Error('Generation failed');
+
+            const data = await response.json();
+            
+            // Update images
+            imageBoxes.forEach((box, index) => {
+                const placeholder = box.querySelector('.image-placeholder');
+                const img = box.querySelector('.generated-image');
+                
+                if (data.images && data.images[index]) {
+                    img.src = data.images[index];
+                    img.style.display = 'block';
+                    placeholder.style.display = 'none';
                 }
             });
 
-            feedbackContent.textContent = 'Images generated successfully!';
+            // Enhanced success feedback
+            systemFeedback.innerHTML = `
+                <div class="feedback-content">
+                    <i data-feather="check-circle" class="success-checkmark"></i>
+                    <span>Images generated successfully</span>
+                    <small style="color: var(--secondary-text)">Ready for download</small>
+                </div>
+            `;
+            feather.replace();
         } catch (error) {
-            feedbackContent.textContent = `Error: ${error.message}`;
+            console.error('Error:', error);
+            // Show error state but keep grid visible
+            imageBoxes.forEach(box => {
+                const placeholder = box.querySelector('.image-placeholder');
+                placeholder.innerHTML = 'Generation failed';
+            });
         }
     }
 
@@ -119,4 +277,6 @@ class DallEGenerator {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     new DallEGenerator();
+    // Ensure the grid is visible initially
+    document.querySelector('.image-grid').style.display = 'grid';
 });
