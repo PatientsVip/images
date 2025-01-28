@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PVIP Image Studio</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Add Inter font for Apple-like typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PVIP Image Studio</h1>
+            <p class="subtitle">Create with AI for your Studies</p>
+        </header>
+
+        <div class="input-section">
+            <div class="input-wrapper">
+                <input type="text" id="promptInput" placeholder="Describe the image you want to create...">
+                <button id="generateBtn" class="generate-btn">Generate</button>
+                <button id="settingsBtn" class="settings-btn">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 13a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M13.7 13.7l.7.7m-8.8-8.8l.7.7m0 7.4l-.7.7m8.8-8.8l-.7.7M19 10h-1m-16 0H1m9-9v1m0 16v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="feedback-section" id="systemFeedback">
+            <div class="feedback-content">
+                <div class="pulse-loader"></div>
+                <span>Ready to create</span>
+            </div>
+        </div>
+
+        <div class="image-grid">
+            <div class="image-box">
+                <div class="image-placeholder">
+                    <span class="placeholder-text">Generation 1</span>
+                </div>
+                <button class="download-btn" aria-label="Download image">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="image-box">
+                <div class="image-placeholder">
+                    <span class="placeholder-text">Generation 2</span>
+                </div>
+                <button class="download-btn" aria-label="Download image">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="image-box">
+                <div class="image-placeholder">
+                    <span class="placeholder-text">Generation 3</span>
+                </div>
+                <button class="download-btn" aria-label="Download image">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
